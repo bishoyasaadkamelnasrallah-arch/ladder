@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ثلاث أسئلة</title>
+<title>أربع أسئلة</title>
 <style>
   :root {
     --bg: #f2efe6;
@@ -36,12 +36,13 @@
 </head>
 <body>
 <main>
-  <h1>ثلاث أسئلة</h1>
-  <p class="sub">اكتب إجابة كل سؤال. جاوب الثلاثة صح، وهيظهر لك مكان الكنز.</p>
+  <h1>أربع أسئلة</h1>
+  <p class="sub">اكتب إجابة كل سؤال. جاوب الأربعة صح، وهيظهر لك مكان الكنز.</p>
   <form id="f" autocomplete="off">
-    <div class="q"><label for="a0">ما عاصمة اليابان؟</label><input id="a0" type="text" autocapitalize="off"></div>
-    <div class="q"><label for="a1">كم عدد قارات العالم؟</label><input id="a1" type="text" autocapitalize="off"></div>
-    <div class="q"><label for="a2">ما أكبر كوكب في المجموعة الشمسية؟</label><input id="a2" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a0">ما عاصمة أستراليا؟</label><input id="a0" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a1">كم عدد عظام جسم الإنسان البالغ؟</label><input id="a1" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a2">ما العنصر الكيميائي الذي رمزه Au؟</label><input id="a2" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a3">من هو أول شهيد في المسيحية؟</label><input id="a3" type="text" autocapitalize="off"></div>
     <button id="go" type="submit">تحقق من الإجابات</button>
   </form>
   <div id="msg" role="status"></div>
@@ -56,11 +57,11 @@
     s = s.replace(/[\u064B-\u065F\u0670\u0640]/g, "");
     s = s.replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي").replace(/[طث]/g, "ت");
     s = s.replace(/[^\u0621-\u064Aa-z0-9]/g, "");
-    if (s.indexOf("ال") === 0 && s.length > 4) s = s.slice(2);
+    if (s.indexOf("ال") === 0 && s.length >= 4) s = s.slice(2);
     return NUMWORDS.hasOwnProperty(s) ? NUMWORDS[s] : s;
   }
 
-  var SALT = "fEBKLx3eoExYcEFEUNA9qA==", IV = "QhpORAd93mZkTAeD", CTS = ["r/1ZFs8MJsBIKNoIy5TS51d0DPZs4TgOck7fuSUK6A+DOO5G/Gu6HlO0sm62BcboRfBD4zzoKRMNX1UjfHxCNkuFrl8=","PK+akVZZTWxuSUhpA+clEuBRU9qTVrZunXcKz5Yo+eqDuAE0Y+RMkvAcPcBMMlYddEhbWIdhMOX6i59LpzGTIaAqJqc=","uUL9A9G1Vt4rwSg8xWpgiZTNHnD9yC3eBtdCRY0mH6Wup67lEpt4v7cfvlOTiowA+AsDVAzbGhU2/CD/iLlvGYiWTLg=","tF+YnejJ/Xel4DN3T0IxrLxy8uxfb6L/VM4Ft7N7U3S3rklLWPjDzkHKHWM6zfldIgEo10h3j/sGx+xaAQb8zjx/wGg="];
+  var SALT = "IXVsUEj7rjOtfr7nqFr7EA==", IV = "UiImYQq8fnxBM38O", CTS = ["SBxPPO0D3pmJ50UMmVO/YaXhKK3Leobgi5dqR5ngHii8cYSEiBLx0PMnK+ymFWt44vX9gjuc7xDHI5M9WxYasVuI4ew=","tRVs82Dsu2Km034bjhQ08fzPc3CfqYoU+fgMfsbh86I9Rf6X+3LIrbAj6lVq8Kkw19HU6C8tRpMpYFTNk5o+tuke5dQ=","L+NQFO4WNpbbFTHa85O2jG+RrsxEHSlJz9sC2+xHq/McYpOL37MDftNCQFh62Q2F7DtB3z3qFu39J5RCZbcard43Tro=","R4OX+eF85F1Ufy+o22GfM0Su8et7WZRgY9hacFT6jipWbV6UGctH5UObHjzl4ReSmPHQGjD/kMXk9hI6OZX5tDu2YJc=","fYBPcnbIHECIdOk0xUm0eoqE1zIdWSJm4QAhruGqOAcq32NJXVnI6dmv/0gzYmVui40XL5KpogWsBIacEWBzOISAvt0=","TvlBOHgjNY6FxfexZEwbIO2JqduaYJM2cwpYFwAAp907AFDf/WrttOkZUu9dKIXyoD0GItQySLk/rNqZIiv3Mwv15nQ=","3gWBWTmREmjMtEj6GopgxS0uYIiWcyJVDdNv2+jcntP4vjW4oE7ggne7mvf+vY+exocTZUfoSi+V3ZbUdOM22iuKW/A=","mpmNe3ZoKE1K4Gdc7iAhlDBJaB9rNjEuwpNheimC45XRjNLOYMMuQr6DZAP8sheXGy6/Cuy9Sfi/rgW9fWiKPr0eKP0=","Baxipcpma6D3V9+X8NAFdFnqbefuk257bL02p0ONRW6+GUztY3oC2tAYM3G1m444TjM0xGoWr5Tj/FwnG+XBsUfjkfM=","F+TYv4yaVzHmMZg+3V+PFuMlrOn2YMEGlWZKt8jyBjWfDjMS/Oip3oSPynPfGsTmRCfd2wJfcdYnG0RcufU+ghXaclI=","u3m0BVTa2b2/tMS/xduei9M5C34Y+j1oksy3a7xfGbn2bgcwg3Oin1oGZ4LFF09HFzCo/z47P4WUjQb2z5c5hiovJiU=","Y+po4hGFRzYjVwaQljFxMtqEnhfrnyytTIZDJN1Tfo7immGjCsddlL9fPI08AbSMTJO2kja7dpwuSxBYPqe3Ul401p8=","FAehPsHXmdpuSEdxkHvfT92XUyvh4GeFfphfT+PyE86YrYaJngsZL51obR3FEqt6Z6pqR6VfQ54QoJ16onO7jY1q398=","bJ3OX/44fPA91oyxKBOWUHNcDVhLu/5K1qrKwly+tr7P0B89BmqB+SXJeg+qX9gCFsyqPsG2mWAqFdFlhTwxDyWkH8A=","CNKEiqY30IU8gPuG2yC6PR9encccBXHH/BBvR/6GPYb0pkvgvq5Jfbgt/EdEdA5oObLw0YqVf29J0yYE+e8W5KRT+MQ=","8kw9QeCPZKGQvJNCtKSYYGutX2+Ghg9XUAKNrsWexNuhArU1EedT1+jII+SSaM1xZ6G5XPHhzC+d6MOkzZIwJMMDddY=","fbzFpiuEnvHGJ5sXMJzFewesaequ8wUfqR2Xvm1DwvwflX8oyOMg3vR32evRKuNrb3YBECz9d5GWqI2eWn0vqp3YEE0=","tlnxFhaGECrpZM7ZgLgj0o/Ta2XN52JuHkgyQrVLRNrlsy5XsaQrbWMJMmqGqJBiVVDUEkA5tTFnG0+rzX3CrIuVaJQ="];
   var ITER = 150000;
 
   function fromB64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
@@ -70,9 +71,9 @@
   form.addEventListener("submit", async function (ev) {
     ev.preventDefault();
     var answers = [];
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
       var v = normalize(document.getElementById("a" + i).value);
-      if (!v) { msg.textContent = "اكتب إجابة الأسئلة الثلاثة الأول."; return; }
+      if (!v) { msg.textContent = "اكتب إجابة الأسئلة الأربعة الأول."; return; }
       answers.push(v);
     }
     msg.textContent = "لحظة…";
