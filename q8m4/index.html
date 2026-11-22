@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ثلاث أسئلة</title>
+<style>
+  :root {
+    --bg: #f2efe6;
+    --ink: #1c2b36;
+    --card: #ffffff;
+    --line: #c9c3b3;
+    --accent: #1c2b36;
+    --accent-ink: #f2efe6;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #14202a; --ink: #f2efe6; --card: #1d2d39; --line: #3a4d5b; --accent: #f2efe6; --accent-ink: #14202a; }
+  }
+  :root[data-theme="dark"] { --bg: #14202a; --ink: #f2efe6; --card: #1d2d39; --line: #3a4d5b; --accent: #f2efe6; --accent-ink: #14202a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Segoe UI", Tahoma, sans-serif; line-height: 1.6; }
+  main { max-width: 34rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 0.25rem; }
+  .sub { margin: 0 0 1.5rem; opacity: 0.8; }
+  .q { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 1rem; margin: 0 0 1rem; }
+  .q label { display: block; font-weight: 700; margin-bottom: 0.5rem; }
+  .q input { width: 100%; font: inherit; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  button { width: 100%; font: inherit; font-weight: 700; padding: 0.9rem; border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 3px solid #3b82f6; outline-offset: 2px; }
+  #msg { margin-top: 1rem; font-weight: 700; min-height: 1.6em; }
+  #win { display: none; margin-top: 1rem; padding: 1.25rem; border-radius: 12px; border: 2px solid var(--accent); background: var(--card); font-size: 1.3rem; font-weight: 700; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ثلاث أسئلة</h1>
+  <p class="sub">اكتب إجابة كل سؤال. جاوب الثلاثة صح، وهيظهر لك مكان الكنز.</p>
+  <form id="f" autocomplete="off">
+    <div class="q"><label for="a0">ما عاصمة اليابان؟</label><input id="a0" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a1">كم عدد قارات العالم؟</label><input id="a1" type="text" autocapitalize="off"></div>
+    <div class="q"><label for="a2">ما أكبر كوكب في المجموعة الشمسية؟</label><input id="a2" type="text" autocapitalize="off"></div>
+    <button id="go" type="submit">تحقق من الإجابات</button>
+  </form>
+  <div id="msg" role="status"></div>
+  <div id="win"></div>
+</main>
+<script>
+  var NUMWORDS = { "صفر": "0", "واحد": "1", "اتنين": "2", "اتنان": "2", "اتنتين": "2", "تلاته": "3", "اربعه": "4", "خمسه": "5", "سته": "6", "سبعه": "7", "سبع": "7", "تمانيه": "8", "تمنيه": "8", "تسعه": "9", "عشره": "10", "عشر": "10", "one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10" };
+  function normalize(s) {
+    s = String(s).toLowerCase();
+    s = s.replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x660); });
+    s = s.replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x6F0); });
+    s = s.replace(/[\u064B-\u065F\u0670\u0640]/g, "");
+    s = s.replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي").replace(/[طث]/g, "ت");
+    s = s.replace(/[^\u0621-\u064Aa-z0-9]/g, "");
+    if (s.indexOf("ال") === 0 && s.length > 4) s = s.slice(2);
+    return NUMWORDS.hasOwnProperty(s) ? NUMWORDS[s] : s;
+  }
+
+  var SALT = "fEBKLx3eoExYcEFEUNA9qA==", IV = "QhpORAd93mZkTAeD", CTS = ["r/1ZFs8MJsBIKNoIy5TS51d0DPZs4TgOck7fuSUK6A+DOO5G/Gu6HlO0sm62BcboRfBD4zzoKRMNX1UjfHxCNkuFrl8=","PK+akVZZTWxuSUhpA+clEuBRU9qTVrZunXcKz5Yo+eqDuAE0Y+RMkvAcPcBMMlYddEhbWIdhMOX6i59LpzGTIaAqJqc=","uUL9A9G1Vt4rwSg8xWpgiZTNHnD9yC3eBtdCRY0mH6Wup67lEpt4v7cfvlOTiowA+AsDVAzbGhU2/CD/iLlvGYiWTLg=","tF+YnejJ/Xel4DN3T0IxrLxy8uxfb6L/VM4Ft7N7U3S3rklLWPjDzkHKHWM6zfldIgEo10h3j/sGx+xaAQb8zjx/wGg="];
+  var ITER = 150000;
+
+  function fromB64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+
+  var form = document.getElementById("f"), msg = document.getElementById("msg"), win = document.getElementById("win"), btn = document.getElementById("go");
+
+  form.addEventListener("submit", async function (ev) {
+    ev.preventDefault();
+    var answers = [];
+    for (var i = 0; i < 3; i++) {
+      var v = normalize(document.getElementById("a" + i).value);
+      if (!v) { msg.textContent = "اكتب إجابة الأسئلة الثلاثة الأول."; return; }
+      answers.push(v);
+    }
+    msg.textContent = "لحظة…";
+    btn.disabled = true;
+    try {
+      var enc = new TextEncoder();
+      var base = await crypto.subtle.importKey("raw", enc.encode(answers.join("|")), "PBKDF2", false, ["deriveKey"]);
+      var key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: fromB64(SALT), iterations: ITER, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+      var text = null;
+      for (var j = 0; j < CTS.length && text === null; j++) {
+        try {
+          var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(IV) }, key, fromB64(CTS[j]));
+          text = new TextDecoder().decode(plain);
+        } catch (e) {}
+      }
+      if (text === null) throw new Error("wrong");
+      msg.textContent = "";
+      win.textContent = text;
+      win.style.display = "block";
+      form.style.display = "none";
+    } catch (e) {
+      msg.textContent = "فيه إجابة غلط. جرّب تاني.";
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
