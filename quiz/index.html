@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مسابقة المعلومات العامة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--tx:#1d2433;--mu:#6b7280;--ac:#c2410c;--ok:#15803d;--bad:#b91c1c;--bd:#e5e0d3}
+@media(prefers-color-scheme:dark){:root{--bg:#14171f;--card:#1e222d;--tx:#f1efe9;--mu:#9aa1b0;--ac:#fb923c;--ok:#4ade80;--bad:#f87171;--bd:#2f3544}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Cairo,system-ui,"Segoe UI",Tahoma,sans-serif;display:flex;justify-content:center;min-height:100vh}
+main{width:100%;max-width:480px;padding:24px 16px 48px}
+h1{font-size:26px;margin:8px 0 4px;text-align:center}
+.sub{color:var(--mu);text-align:center;margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:14px}
+label{display:block;font-weight:700;margin:0 0 6px}
+input{width:100%;font:inherit;font-size:20px;padding:12px 14px;border:2px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);margin-bottom:14px;text-align:center}
+input:focus{outline:none;border-color:var(--ac)}
+button{font:inherit;font-weight:700;cursor:pointer;border:0;border-radius:12px;padding:14px 16px;width:100%;background:var(--ac);color:#fff;font-size:18px}
+button.alt{background:transparent;color:var(--tx);border:2px solid var(--bd)}
+button:disabled{opacity:.6;cursor:default}
+.big{font-size:40px;font-weight:800;text-align:center;letter-spacing:4px;color:var(--ac)}
+.net{text-align:center;color:var(--mu);font-size:14px;margin:6px 0 14px}
+.pl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.pl span{background:var(--bg);border:1px solid var(--bd);border-radius:999px;padding:4px 14px}
+.top{display:flex;justify-content:space-between;color:var(--mu);font-size:14px;margin-bottom:8px}
+.bar{height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:100%;background:var(--ac)}
+.q{font-size:22px;font-weight:800;margin:0 0 16px;line-height:1.5}
+.opt{background:var(--card);color:var(--tx);border:2px solid var(--bd);text-align:right;margin-bottom:10px;font-size:18px}
+.opt.sel{border-color:var(--ac)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.row{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--bd)}
+.row:last-child{border:0}
+.row b{color:var(--ac)}
+.msg{text-align:center;color:var(--mu);margin:10px 0}
+.win{font-size:48px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>🎯 مسابقة المعلومات</h1>
+<p class="sub">ادخل نفس رقم الغرفة وكلنا نلعب سوا</p>
+
+<section class="s" id="entry">
+  <div class="card">
+    <label for="code">رقم الغرفة</label>
+    <input id="code" inputmode="numeric" autocomplete="off" placeholder="مثلاً 123">
+    <label for="name">اسمك</label>
+    <input id="name" autocomplete="off" maxlength="16" placeholder="اسمك">
+    <button id="go">ادخل</button>
+  </div>
+</section>
+
+<section class="s" id="lobby" hidden>
+  <div class="card">
+    <div class="sub" style="margin:0">رقم الغرفة</div>
+    <div class="big" id="rc"></div>
+    <div class="net" id="net"></div>
+    <div><b>اللاعبين (<span id="cnt">1</span>)</b></div>
+    <div class="pl" id="pl"></div>
+  </div>
+  <div class="msg" id="note"></div>
+  <button id="start">ابدأ المسابقة (١٠ أسئلة)</button>
+  <p class="msg">أي حد يقدر يدوس ابدأ، والباقي هيدخلوا معاه على طول.</p>
+  <button class="alt" id="back">غيّر الغرفة</button>
+</section>
+
+<section class="s" id="play" hidden>
+  <div class="top"><span id="qn"></span><span id="tm"></span></div>
+  <div class="bar"><i id="bar"></i></div>
+  <p class="q" id="qt"></p>
+  <div id="opts"></div>
+  <div class="card" id="sbWrap" hidden><b>الترتيب</b><div id="sb"></div></div>
+</section>
+
+<section class="s" id="end" hidden>
+  <div class="win">🏆</div>
+  <h1 id="wn"></h1>
+  <div class="card" id="fin"></div>
+  <button id="again">ارجع للّوبي</button>
+</section>
+</main>
+
+<script>
+// ====== الأسئلة: [السؤال، [4 اختيارات]، رقم الإجابة الصح من 0] — عدّل براحتك ======
+const Q=[
+["عاصمة اليابان؟",["سول","طوكيو","كيوتو","أوساكا"],1],
+["أكبر كوكب في المجموعة الشمسية؟",["زحل","الأرض","المشتري","المريخ"],2],
+["كام لون في قوس قزح؟",["5","6","7","8"],2],
+["نهر النيل بيصب في أنهي بحر؟",["الأحمر","المتوسط","الأسود","العرب"],1],
+["كام يوم في السنة الكبيسة؟",["365","366","364","367"],1],
+["أكبر محيط في العالم؟",["الأطلسي","الهندي","المتجمد","الهادي"],3],
+["مين رسم لوحة الموناليزا؟",["ليوناردو دا فينشي","بيكاسو","فان جوخ","مايكل أنجلو"],0],
+["الرمز الكيميائي للذهب؟",["Ag","Fe","Au","Go"],2],
+["أسرع حيوان بري؟",["الأسد","الفهد","الحصان","النمر"],1],
+["أكبر دولة في العالم مساحةً؟",["الصين","كندا","أمريكا","روسيا"],3],
+["أقرب كوكب للشمس؟",["عطارد","الزهرة","المريخ","الأرض"],0],
+["كام لاعب في فريق كورة القدم جوه الملعب؟",["9","10","11","12"],2],
+["مين بنى الهرم الأكبر في الجيزة؟",["خفرع","خوفو","منقرع","رمسيس"],1],
+["الغاز اللي بنتنفسه ونحتاجه عشان نعيش؟",["الأكسجين","النيتروجين","الهيدروجين","الهيليوم"],0],
+["أكبر عضو في جسم الإنسان؟",["الكبد","القلب","الجلد","الرئة"],2],
+["كام حرف في اللغة العربية؟",["26","28","30","29"],1],
+["الحيوان اللي بيتسمى «سفينة الصحراء»؟",["الحصان","الجمل","الحمار","الغزال"],1],
+["كام قارة في العالم؟",["5","6","7","8"],2],
+["الكوكب الأحمر هو؟",["المريخ","الزهرة","زحل","عطارد"],0],
+["أكبر حيوان في العالم؟",["الفيل","القرش","الحوت الأزرق","الزرافة"],2],
+["السد العالي موجود في أنهي مدينة؟",["الأقصر","أسوان","قنا","سوهاج"],1],
+["أعلى جبل في العالم؟",["إيفرست","كليمنجارو","جبل سيناء","ألب"],0],
+["عملة اليابان؟",["اليوان","الوون","الين","الدولار"],2],
+["مين بنى الفلك؟",["إبراهيم","موسى","نوح","داود"],2],
+["كام تلميذ كان للسيد المسيح؟",["7","10","12","14"],2]
+];
+const DUR=15, ROUNDS=10;
+const LIBS=["https://cdn.jsdelivr.net/npm/trystero@0.21.5/+esm","https://cdn.jsdelivr.net/npm/trystero@0.20.0/+esm","https://esm.sh/trystero@0.21.5"];
+
+const $=s=>document.querySelector(s);
+const show=id=>document.querySelectorAll('.s').forEach(e=>e.hidden=e.id!==id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+let send=()=>{},selfId='me',myName='',peers={},room=null,G=null,H=null,tick=null;
+
+async function loadLib(){for(const u of LIBS){try{return await import(u)}catch(e){}}return null}
+
+$('#go').onclick=async()=>{
+  const code=$('#code').value.replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/\s/g,'');
+  if(!code){$('#code').focus();return}
+  myName=$('#name').value.trim()||'لاعب';
+  $('#rc').textContent=code;$('#net').textContent='بنتّصل...';show('lobby');renderLobby();
+  const lib=await loadLib();
+  if(!lib){$('#net').textContent='مفيش اتصال دلوقتي، جرّب تعمل ريفريش';return}
+  selfId=lib.selfId;
+  room=lib.joinRoom({appId:'ladder-quiz-k7'},'r'+code.slice(0,40));
+  const [s,g]=room.makeAction('msg');send=s;g(onMsg);
+  room.onPeerJoin(id=>{send({t:'hi',n:myName},id);if(H&&H.cur)send({...H.cur,dur:Math.max(3,Math.round(DUR-(Date.now()-H.t0)/1000))},id)});
+  room.onPeerLeave(id=>{delete peers[id];if(G&&G.host===id)abort('اللي بدأ المسابقة خرج، ابدأوا من جديد');renderLobby()});
+  $('#net').textContent='متصل ✓ — اللي يدخل نفس الرقم هيظهر هنا';
+};
+$('#back').onclick=()=>{if(room)room.leave();location.reload()};
+$('#start').onclick=()=>startGame();
+$('#again').onclick=()=>{G=null;show('lobby');renderLobby()};
+
+function renderLobby(){
+  const names=[myName+' (أنت)',...Object.values(peers).map(p=>p.n)];
+  $('#cnt').textContent=names.length;
+  const pl=$('#pl');pl.replaceChildren(...names.map(n=>el('span',0,n)));
+}
+function abort(m){clearInterval(tick);G=null;H&&clearTimeout(H.timer);H=null;show('lobby');$('#note').textContent=m;renderLobby()}
+
+function onMsg(m,from){
+  if(!m||typeof m!=='object')return;
+  if(m.t==='hi'){const k=!!peers[from];peers[from]={n:String(m.n||'لاعب').slice(0,16)};if(!k)send({t:'hi',n:myName},from);renderLobby()}
+  else if(m.t==='q'){
+    if(H){if(from<selfId){clearTimeout(H.timer);H=null}else return}
+    onQ(m,from)}
+  else if(m.t==='a'&&H&&H.cur&&m.i===H.cur.i)gotAnswer(from,m.c,m.e);
+  else if(m.t==='r'&&G&&G.host===from)onR(m);
+  else if(m.t==='end'&&G&&G.host===from)onEnd(m);
+}
+
+// ---- المضيف (اللي داس ابدأ) ----
+function startGame(){
+  if(G||H)return;
+  H={ids:shuffle(Q.keys()).slice(0,ROUNDS),i:0,sc:{}};
+  H.sc[selfId]={n:myName,s:0};for(const id in peers)H.sc[id]={n:peers[id].n,s:0};
+  nextQ();
+}
+function nextQ(){
+  H.ans={};H.cur={t:'q',i:H.i,n:H.ids.length,qid:H.ids[H.i],dur:DUR};H.t0=Date.now();
+  send(H.cur);onQ(H.cur,selfId);H.timer=setTimeout(reveal,DUR*1000+1500);
+}
+function gotAnswer(id,c,e){
+  if(H.ans[id]||!(c>=0&&c<=3))return;
+  H.ans[id]={c:c|0,e:Math.min(DUR,Math.max(0,+e||0))};
+  if(Object.keys(H.ans).length>=Object.keys(peers).length+1){clearTimeout(H.timer);H.timer=setTimeout(reveal,600)}
+}
+function reveal(){
+  clearTimeout(H.timer);const q=Q[H.cur.qid];
+  for(const id in peers)if(!H.sc[id])H.sc[id]={n:peers[id].n,s:0};
+  for(const id in H.ans){const{c,e}=H.ans[id];if(!H.sc[id])H.sc[id]={n:(peers[id]||{}).n||'لاعب',s:0};
+    if(c===q[2])H.sc[id].s+=100+Math.round(50*(1-e/DUR))}
+  const m={t:'r',i:H.cur.i,correct:q[2],sc:H.sc};send(m);onR(m);
+  H.timer=setTimeout(()=>{H.i++;if(H.i>=H.ids.length){const e={t:'end',sc:H.sc};send(e);onEnd(e);H=null}else nextQ()},5000);
+}
+
+// ---- كل اللاعبين ----
+function onQ(m,from){
+  clearInterval(tick);
+  G={host:from,i:m.i,qid:m.qid,dur:m.dur,t0:Date.now(),c:null,done:false};
+  const q=Q[m.qid];if(!q)return;
+  show('play');$('#qn').textContent='سؤال '+(m.i+1)+' من '+m.n;$('#qt').textContent=q[0];
+  $('#sbWrap').hidden=true;
+  $('#opts').replaceChildren(...q[1].map((t,i)=>{const b=el('button','opt',t);b.onclick=()=>pick(i);return b}));
+  tick=setInterval(()=>{
+    const left=Math.max(0,G.dur-(Date.now()-G.t0)/1000);
+    $('#bar').style.width=(left/G.dur*100)+'%';$('#tm').textContent=Math.ceil(left)+' ث';
+    if(left<=0){G.done=true;clearInterval(tick)}
+  },200);
+}
+function pick(c){
+  if(!G||G.c!==null||G.done)return;
+  G.c=c;[...$('#opts').children].forEach((b,i)=>{b.disabled=true;if(i===c)b.classList.add('sel')});
+  const e=(Date.now()-G.t0)/1000;
+  if(H)gotAnswer(selfId,c,e);else send({t:'a',i:G.i,c,e},G.host);
+}
+function onR(m){
+  clearInterval(tick);if(G)G.done=true;
+  [...$('#opts').children].forEach((b,i)=>{b.disabled=true;b.classList.remove('sel');
+    if(i===m.correct)b.classList.add('ok');else if(G&&i===G.c)b.classList.add('bad')});
+  $('#tm').textContent='';$('#bar').style.width='0';
+  board(m.sc,$('#sb'),5);$('#sbWrap').hidden=false;
+}
+function board(sc,box,max){
+  const rows=Object.entries(sc).sort((a,b)=>b[1].s-a[1].s).slice(0,max||99);
+  box.replaceChildren(...rows.map(([id,p],i)=>{const r=el('div','row');
+    r.append(el('span',0,(i+1)+'. '+p.n+(id===selfId?' (أنت)':'')),el('b',0,String(p.s)));return r}));
+}
+function onEnd(m){
+  clearInterval(tick);G=null;show('end');
+  const top=Object.values(m.sc).sort((a,b)=>b.s-a.s)[0];
+  $('#wn').textContent=top?'الفايز: '+top.n:'خلصت المسابقة';
+  board(m.sc,$('#fin'));
+}
+renderLobby();
+</script>
+</body>
+  </html>
